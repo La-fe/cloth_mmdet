@@ -82,7 +82,7 @@ test_cfg = dict(
         nms_thr=0.7,
         min_bbox_size=0),
     rcnn=dict(
-        score_thr=0.05, nms=dict(type='nms', iou_thr=0.5), max_per_img=100)
+        score_thr=0.05, nms=dict(type='nms', iou_thr=0.8), max_per_img=100)
     # soft-nms is also supported for rcnn testing
     # e.g., nms=dict(type='soft_nms', iou_thr=0.5, min_score=0.05)
 )
@@ -118,8 +118,8 @@ data = dict(
         with_label=True),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instances_val.json',
-        img_prefix=data_root + 'images/val/',
+        ann_file=data_root + 'instances_train.json',
+        img_prefix=data_root + 'Images/',
         img_scale=(1333, 800),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
@@ -150,7 +150,7 @@ log_config = dict(
 total_epochs = 12
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/faster_rcnn_r101_fpn_1x_7'
-load_from = './checkpoints/faster_rcnn_r101_fpn_1x_20181129-d1468807_21_5anchor.pth'
+work_dir = './work_dirs/faster_rcnn_r101_fpn_1x_4'
+load_from = './checkpoints/faster_rcnn_r101_fpn_1x_20181129-d1468807_21.pth'
 resume_from = None
 workflow = [('train', 1)]
