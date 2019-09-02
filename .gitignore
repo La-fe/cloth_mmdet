@@ -102,3 +102,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+mmdetection-pytorch-0.4.1/vis.py
