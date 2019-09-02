@@ -1,5 +1,6 @@
 import argparse
-
+import sys
+sys.path.append('/home/remo/cloth_mmdet/mmdetection-pytorch-0.4.1/mmcv-master')
 import torch
 import mmcv
 from mmcv.runner import load_checkpoint, parallel_test, obj_from_dict

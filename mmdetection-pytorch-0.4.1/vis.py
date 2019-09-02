@@ -45,9 +45,10 @@ def vis():
         for i in range(len(model)):
             result = inference_detector(model[i], img, cfg[i])
             re,img = show_result(img,result,dataset='cloths',show = False)
-            cv2.namedWindow(str(i),0)
-            cv2.resizeWindow(str(i),1920,1080)
-            cv2.imshow(str(i),img)
+            name = config[i].split('_')[-1].split('.')[0]
+            cv2.namedWindow(str(name),0)
+            cv2.resizeWindow(str(name),1920,1080)
+            cv2.imshow(str(name),img)
         cv2.waitKey(0)
 
 
@@ -81,9 +82,15 @@ def result():
 
 if __name__ == "__main__":
     pic_path = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_testA_20190818/'
-    config = ['./cloth_config/cloth_faster_rcnn_r101_fpn_1x.py', './cloth_config/cloth_faster_rcnn_r101_fpn_1x.py']
-    model_path = ['/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth',
-                  '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth']
+    config = ['./cloth_config/cloth_faster_rcnn_r101_fpn_1x_4.py',
+              './cloth_config/cloth_faster_rcnn_r101_fpn_1x_4_test.py',
+              # './cloth_config/cloth_faster_rcnn_r101_fpn_1x_5.py'
+              ]
+    model_path = ['/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_4/latest.pth',
+                  '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_4/latest.pth',
+                  # '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_5/latest.pth'
+                  ]
+
     model2make_json = "/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth"
     config2make_json = './cloth_config/cloth_faster_rcnn_r101_fpn_1x.py'
     json_path = '/home/remo/Desktop/cloth_flaw_detection/Results/result_test.json'
