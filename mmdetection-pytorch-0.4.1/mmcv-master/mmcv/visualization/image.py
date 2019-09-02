@@ -13,7 +13,9 @@ def imshow(img, win_name='', wait_time=0):
         win_name (str): The window name.
         wait_time (int): Value of waitKey param.
     """
-    cv2.imshow(win_name, imread(img))
+    cv2.namedWindow("result",0)
+    cv2.resizeWindow("result",1920,1080)
+    cv2.imshow('result', imread(img))
     cv2.waitKey(wait_time)
 
 
@@ -73,8 +75,8 @@ def imshow_det_bboxes(img,
                       score_thr=0,
                       bbox_color='green',
                       text_color='green',
-                      thickness=1,
-                      font_scale=0.5,
+                      thickness=3,
+                      font_scale=1,
                       show=True,
                       win_name='',
                       wait_time=0,
@@ -112,7 +114,7 @@ def imshow_det_bboxes(img,
 
     bbox_color = color_val(bbox_color)
     text_color = color_val(text_color)
-
+    anno = []
     for bbox, label in zip(bboxes, labels):
         bbox_int = bbox.astype(np.int32)
         left_top = (bbox_int[0], bbox_int[1])
@@ -121,12 +123,16 @@ def imshow_det_bboxes(img,
             img, left_top, right_bottom, bbox_color, thickness=thickness)
         label_text = class_names[
             label] if class_names is not None else 'cls {}'.format(label)
+        anno_box = list(bbox)
+        anno_box.append(int(label_text))
         if len(bbox) > 4:
             label_text += '|{:.02f}'.format(bbox[-1])
         cv2.putText(img, label_text, (bbox_int[0], bbox_int[1] - 2),
                     cv2.FONT_HERSHEY_COMPLEX, font_scale, text_color)
-
+        anno.append(anno_box)
     if show:
         imshow(img, win_name, wait_time)
     if out_file is not None:
         imwrite(img, out_file)
+    return anno
+

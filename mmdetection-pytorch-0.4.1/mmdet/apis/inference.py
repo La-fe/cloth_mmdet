@@ -48,7 +48,7 @@ def inference_detector(model, imgs, cfg, device='cuda:0'):
         return _inference_generator(model, imgs, img_transform, cfg, device)
 
 
-def show_result(img, result, dataset='coco', score_thr=0.3):
+def show_result(img, result, dataset='coco', score_thr=0.5,show = True):
     class_names = get_classes(dataset)
     labels = [
         np.full(bbox.shape[0], i, dtype=np.int32)
@@ -57,9 +57,11 @@ def show_result(img, result, dataset='coco', score_thr=0.3):
     labels = np.concatenate(labels)
     bboxes = np.vstack(result)
     img = mmcv.imread(img)
-    mmcv.imshow_det_bboxes(
+    anno = mmcv.imshow_det_bboxes(
         img.copy(),
         bboxes,
         labels,
+        show = show,
         class_names=class_names,
         score_thr=score_thr)
+    return anno
