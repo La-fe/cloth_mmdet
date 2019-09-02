@@ -7,16 +7,9 @@ from mmdet.apis import inference_detector, show_result
 import json
 import os
 import numpy as np
+import cv2
 
-pic_path = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_testA_20190818/'
-config = './cloth_config/cloth_faster_rcnn_r101_fpn_1x.py'
-# model_path = '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x/epoch_38.pth'
-# json_path = '/home/remo/Desktop/cloth_flaw_detection/Results/result_2wei.json'
-# model_path = '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_all_data/latest.pth'
-# model_path = '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/cloth_faster_rcnn_r101_fpn_1x_2446_1000/latest.pth'
-# model_path = '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/cloth_faster_rcnn_r101_fpn_1x_rcnn_ohem_add_crop/latest.pth'
-model_path = '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth'
-json_path = '/home/remo/Desktop/cloth_flaw_detection/Results/result_test.json'
+
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -35,30 +28,67 @@ def two_size(data):
     new_data = data[0]+'.'+ data[1][:2]
     return float(new_data)
 
-cfg = mmcv.Config.fromfile(config)
-cfg.model.pretrained = None
+def vis():
+    cfg = [mmcv.Config.fromfile(config_) for config_ in config]
+    for cfg_ in cfg:
+        cfg_.model.pretrained = None
 
-# construct the model and load checkpoint
-model = build_detector(cfg.model, test_cfg=cfg.test_cfg)
-_ = load_checkpoint(model, model_path)
-# test a single image
-imgs = os.listdir(pic_path)
-meta = []
-from tqdm import tqdm
-for im in tqdm(imgs):
-    img = pic_path+im
-    img = mmcv.imread(img)
-    result = inference_detector(model, img, cfg)
-    re = show_result(img,result,dataset='cloths',show = True)
-    if len(re):
-        for box in re:
-            anno = {}
-            anno['name'] = im
-            anno['category'] = int(box[5])
-            anno['bbox'] = [round(float(i),2) for i in box[0:4]]
-            anno['score'] = float(box[4])
-            meta.append(anno)
-with open(json_path, 'w') as fp:
-    json.dump(meta, fp,cls = MyEncoder)
+    # construct the model and load checkpoint
+    model = [build_detector(cfg_.model, test_cfg=cfg_.test_cfg) for cfg_ in cfg]
+    _ = [load_checkpoint(model[i], model_path[i]) for i in range(len(model))]
+    # test a single image
+    imgs = os.listdir(pic_path)
+    from tqdm import tqdm
+    for im in tqdm(imgs):
+        img = pic_path+im
+        img = mmcv.imread(img)
+        for i in range(len(model)):
+            result = inference_detector(model[i], img, cfg[i])
+            re,img = show_result(img,result,dataset='cloths',show = False)
+            cv2.namedWindow(str(i),0)
+            cv2.resizeWindow(str(i),1920,1080)
+            cv2.imshow(str(i),img)
+        cv2.waitKey(0)
+
+
+
+def result():
+    cfg = mmcv.Config.fromfile(config2make_json)
+    cfg.model.pretrained = None
+
+    # construct the model and load checkpoint
+    model = build_detector(cfg.model, test_cfg=cfg.test_cfg)
+    _ = load_checkpoint(model, model2make_json)
+    # test a single image
+    imgs = os.listdir(pic_path)
+    meta = []
+    from tqdm import tqdm
+    for im in tqdm(imgs):
+        img = pic_path + im
+        img = mmcv.imread(img)
+        result = inference_detector(model, img, cfg)
+        re,img = show_result(img, result, dataset='cloths', show=False)
+        if len(re):
+            for box in re:
+                anno = {}
+                anno['name'] = im
+                anno['category'] = int(box[5])
+                anno['bbox'] = [round(float(i), 2) for i in box[0:4]]
+                anno['score'] = float(box[4])
+                meta.append(anno)
+    with open(json_path, 'w') as fp:
+        json.dump(meta, fp, cls=MyEncoder)
+
+if __name__ == "__main__":
+    pic_path = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_testA_20190818/'
+    config = ['./cloth_config/cloth_faster_rcnn_r101_fpn_1x.py', './cloth_config/cloth_faster_rcnn_r101_fpn_1x.py']
+    model_path = ['/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth',
+                  '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth']
+    model2make_json = "/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth"
+    config2make_json = './cloth_config/cloth_faster_rcnn_r101_fpn_1x.py'
+    json_path = '/home/remo/Desktop/cloth_flaw_detection/Results/result_test.json'
+    # result()
+    vis()
+
 
 

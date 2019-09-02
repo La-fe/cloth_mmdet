@@ -13,8 +13,8 @@ def imshow(img, win_name='', wait_time=0):
         win_name (str): The window name.
         wait_time (int): Value of waitKey param.
     """
-    cv2.namedWindow("result",0)
-    cv2.resizeWindow("result",1920,1080)
+    # cv2.namedWindow("result",0)
+    # cv2.resizeWindow("result",1920,1080)
     cv2.imshow('result', imread(img))
     cv2.waitKey(wait_time)
 
@@ -134,5 +134,5 @@ def imshow_det_bboxes(img,
         imshow(img, win_name, wait_time)
     if out_file is not None:
         imwrite(img, out_file)
-    return anno
+    return anno,img
 
