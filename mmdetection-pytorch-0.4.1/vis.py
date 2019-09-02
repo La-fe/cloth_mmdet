@@ -10,6 +10,20 @@ import numpy as np
 import cv2
 
 
+def load_file(path):
+    anno = {}
+    for i in range(len(path)):
+        f = json.load(open(path[i], 'r'))
+        for info in f:
+            im_name = info['name']
+            label = info['defect_name']
+            bbox = info['bbox']
+            if im_name not in anno.keys():
+                anno[im_name] = [[bbox, label]]
+            else:
+                anno[im_name].append([bbox, label])
+
+    return anno
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -41,14 +55,26 @@ def vis():
     from tqdm import tqdm
     for im in tqdm(imgs):
         img = pic_path+im
+
         img = mmcv.imread(img)
         for i in range(len(model)):
             result = inference_detector(model[i], img, cfg[i])
-            re,img = show_result(img,result,dataset='cloths',show = False)
+            re,image = show_result(img,result,dataset='cloths',show = False)
+            if im in anno.keys():
+                bboxes = anno[im]
+                for bbox in bboxes:
+                    box = bbox[0]
+                    label = bbox[1]
+                    x1 = int(box[0])
+                    y1 = int(box[1])
+                    x2 = int(box[2])
+                    y2 = int(box[3])
+                    cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    cv2.putText(image, '%d' % cat[label], (x2, y2), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 0, 255), 1)
             name = config[i].split('_')[-1].split('.')[0]
             cv2.namedWindow(str(name),0)
             cv2.resizeWindow(str(name),1920,1080)
-            cv2.imshow(str(name),img)
+            cv2.imshow(str(name),image)
         cv2.waitKey(0)
 
 
@@ -81,21 +107,39 @@ def result():
         json.dump(meta, fp, cls=MyEncoder)
 
 if __name__ == "__main__":
+    cat = {
+        '破洞': 1, '水渍': 2, '油渍': 2, '污渍': 2, '三丝': 3, '结头': 4, '花板跳': 5, '百脚': 6, '毛粒': 7,
+        '粗经': 8, '松经': 9, '断经': 10, '吊经': 11, '粗维': 12, '纬缩': 13, '浆斑': 14, '整经结': 15, '星跳': 16, '跳花': 16,
+        '断氨纶': 17, '稀密档': 18, '浪纹档': 18, '色差档': 18, '磨痕': 19, '轧痕': 19, '修痕': 19, '烧毛痕': 19, '死皱': 20, '云织': 20,
+        '双纬': 20, '双经': 20, '跳纱': 20, '筘路': 20, '纬纱不良': 20,
+    }
+
+    json_file = [
+        "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train2_20190828/Annotations/anno_train.json",
+        "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190809/Annotations/gt_result.json"]
+
+
     pic_path = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_testA_20190818/'
+    # pic_path = '/home/remo/Desktop/cloth_flaw_detection/Dataset/Raw/Images/'
+
     config = ['./cloth_config/cloth_faster_rcnn_r101_fpn_1x_4.py',
-              './cloth_config/cloth_faster_rcnn_r101_fpn_1x_4_test.py',
+              './cloth_config/cloth_faster_rcnn_r101_fpn_1x_10.py',
+              # './cloth_config/cloth_faster_rcnn_r101_fpn_1x_4_test.py',
               # './cloth_config/cloth_faster_rcnn_r101_fpn_1x_5.py'
               ]
     model_path = ['/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_4/latest.pth',
-                  '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_4/latest.pth',
+                  '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_10/latest.pth',
+                  # '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_4/latest.pth',
                   # '/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_5/latest.pth'
                   ]
 
-    model2make_json = "/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_7/latest.pth"
-    config2make_json = './cloth_config/cloth_faster_rcnn_r101_fpn_1x.py'
-    json_path = '/home/remo/Desktop/cloth_flaw_detection/Results/result_test.json'
-    # result()
-    vis()
+    model2make_json = "/home/remo/Desktop/cloth_flaw_detection/mmdete_ckpt/faster_rcnn_r101_fpn_1x_10/latest.pth"
+    config2make_json = './cloth_config/cloth_faster_rcnn_r101_fpn_1x_10.py'
+    json_path = '/home/remo/Desktop/cloth_flaw_detection/Results/result_10.json'
+
+    result()
+    # anno = load_file(json_file)
+    # vis()
 
 
 
