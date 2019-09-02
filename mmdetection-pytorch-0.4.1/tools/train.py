@@ -1,5 +1,6 @@
 from __future__ import division
-
+import sys
+sys.path.append('/home/zhangming/cloth_mmdet/mmdetection-pytorch-0.4.1/mmcv-master')
 import argparse
 from mmcv import Config
 
