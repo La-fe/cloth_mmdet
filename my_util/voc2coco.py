@@ -117,10 +117,10 @@ if __name__ == '__main__':
     # 8ae9325e97ea65e91559588215.xml
     # b694146d8e8bca7e0809271804.xml
     # .....
-    # XML_path = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/train.txt'
-    # XML_DIR = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/train'
-    # OUTPU_JSON = '/home/remo/Desktop/cloth_flaw_detection/Dataset/COCO_format/train_coco.json'
-    XML_path = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/val.txt'
-    XML_DIR = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/val'
-    OUTPU_JSON = '/home/remo/Desktop/cloth_flaw_detection/Dataset/COCO_format/val_coco.json'
+    XML_path = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/train.txt'
+    XML_DIR = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/train'
+    OUTPU_JSON = '/home/remo/Desktop/cloth_flaw_detection/Dataset/COCO_format/train_coco.json'
+    # XML_path = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/val.txt'
+    # XML_DIR = '/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/val'
+    # OUTPU_JSON = '/home/remo/Desktop/cloth_flaw_detection/Dataset/COCO_format/val_coco.json'
     convert(XML_path, XML_DIR, OUTPU_JSON)
