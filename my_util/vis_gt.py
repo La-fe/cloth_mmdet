@@ -302,16 +302,19 @@ if __name__ == "__main__":
     flag_make_xml = True
     # json_file = "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190809/Annotations/gt_result.json"
     # json_file = "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train2_20190828/Annotations/anno_train.json"
+
     json_file = ["/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train2_20190828/Annotations/anno_train.json",
-                 "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190809/Annotations/gt_result.json"]
+                 "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190818/Annotations/anno_train.json"]
+
     # defect_Images = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190809/defect_Images/'
     # normal_Images = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190809/normal_Images/'
     # all_Images = '/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train2_20190828/All_Images/'
-    all_Images = '/home/remo/Desktop/cloth_flaw_detection/Dataset/Raw/Images/'
+
+    all_Images = '/home/remo/Desktop/cloth_flaw_detection/Dataset/COCO_format/Images/'
     xml_root = "/home/remo/Desktop/cloth_flaw_detection/Dataset/VOC_format/Annotations/"
     path_txt = "/home/remo/Desktop/cloth_flaw_detection/guangdong1_round1_train1_20190809/retinanet_data/train.txt"
     anno, train_anno, val_anno, labels_num, area = load_file(json_file,cat)
-    # vis_gt(anno,train_anno,val_anno,flag_make_xml,xml_root,cat)
-    draw(labels_num,cat)
+    vis_gt(anno,train_anno,val_anno,flag_make_xml,xml_root,cat)
+    # draw(labels_num,cat)
     # draw_area(area)
     # make_txt(anno, path_txt, defect_Images, cat)
