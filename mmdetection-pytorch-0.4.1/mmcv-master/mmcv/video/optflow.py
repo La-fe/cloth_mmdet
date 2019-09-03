@@ -1,6 +1,5 @@
 import numpy as np
-
-#from mmcv._ext import flow_warp_c
+# from mmcv._ext import flow_warp_c
 from mmcv.arraymisc import dequantize, quantize
 from mmcv.image import imread, imwrite
 from mmcv.utils import is_str

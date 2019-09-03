@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../mmdetection-pytorch-0.4.1/mmcv-master')
+sys.path.append('/home/zhangming/cloth_mmdet/mmdetection-pytorch-0.4.1/mmcv-master')
 import mmcv
 from mmcv.runner import load_checkpoint
 from mmdet.models import build_detector
@@ -33,9 +33,9 @@ def result():
     from tqdm import tqdm
     for im in tqdm(imgs):
         img = pic_path + im
-        img = mmcv.imread(img)
-        result = inference_detector(model, img, cfg)
-        re,img = show_result(img, result, dataset='cloths', show=False,score_thr = 0.5)
+        image = mmcv.imread(img)
+        result_ = inference_detector(model, image, cfg)
+        re,img_ = show_result(image, result_, dataset='cloths', show=False,score_thr = 0.5)
         if len(re):
             for box in re:
                 anno = {}
