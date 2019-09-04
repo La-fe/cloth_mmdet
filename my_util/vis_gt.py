@@ -19,13 +19,14 @@ from tqdm import tqdm
 
 import imgaug as ia
 from imgaug import augmenters as iaa
+from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import imageio
 import getpass  # 获取用户名
 
 USER = getpass.getuser()
 
 
-def load_file(path, cat):
+def load_file(path, cat=None):
     anno = {}
     train_anno = {}
     val_anno = {}
@@ -385,6 +386,8 @@ class DataAnalyze:
                  'w':1,
                  'h':1,
                  'area':1,
+                 'im_w':1
+                 'im_h':2
                  }
 
         all_instance
@@ -446,6 +449,16 @@ class DataAnalyze:
         plt.grid(True)
         plt.show()
 
+    def draw_cls(self):
+        myfont = matplotlib.font_manager.FontProperties(fname='/home/remo/Desktop/simkai_downcc/simkai.ttf')
+        cls = [i for i in range(1,self.num_classes+1)]
+        cls_each = [len(self.cla_instance[str(i)]) for i in range(1,self.num_classes+1)]
+        plt.xticks(range(1, len(cls) + 1), cls, font_properties=myfont, rotation=0)
+        plt.bar(cls, cls_each, color='rgb')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
     def add_aug_data(self, add_num=500, aug_save_path=None, json_file_path=None):
         '''
         1. 设定补充的数据量
@@ -478,20 +491,24 @@ class DataAnalyze:
                 img = cv2.imread(instance.abs_path)
                 try:  # 检测图片是否可用
                     h, w, c = img.shape
+                    img_info = edict({'img_h':h, "img_w":w})
                 except:
                     print("%s is wrong " % instance.abs_path)
-
+                import copy
                 for i in range(each_num):  # 循环多次进行增广保存
-
-                    aug_img, img_info_tmp = transformer(img, instance)
-
-                    aug_json_list.append(img_info_tmp)
+                    img_ins = copy.deepcopy(self.img_instance[instance.name])
+                    aug_img, img_info_tmp = transformer.aug_img(img, img_ins, img_info = img_info) # list
                     aug_name = '%s_aug%d.jpg' % (
-                    osp.splitext(instance.name)[0], i)  # 6598413.jpg -> 6598413_aug0.jpg, 6598413_aug1.jpg
+                    osp.splitext(instance.name)[0], i) # 6598413.jpg -> 6598413_aug0.jpg, 6598413_aug1.jpg
                     aug_abs_path = osp.join(aug_save_path, aug_name)
-                    cv2.imwrite(aug_abs_path, aug_img)
+                    for ins in img_info_tmp:
+                        ins.name = aug_name
+                        ins.abs_path = aug_abs_path
+                        aug_json_list.append(ins)
 
-        # 保存aug_json 文件
+                    cv2.imwrite(aug_abs_path, aug_img)
+        #
+        # # 保存aug_json 文件
         with open(json_file_path, 'w') as f:
             json.dump(aug_json_list, f, indent=4, separators=(',', ': '))
 
@@ -540,9 +557,13 @@ class DataAnalyze:
 
 class Transformer:
     def __init__(self):
-        # self.aug_img_seq = iaa.Sequential([
-        # ], random_order=True)
-        pass
+        self.aug_img_seq = iaa.Sequential([
+            iaa.Fliplr(0.8),
+            iaa.Flipud(0.8),
+            # iaa.Invert(1.0),
+            iaa.Crop(percent=0.1)
+        ], random_order=True)
+        # pass
 
     def __call__(self, imgBGR, instance=None):
         imgRGB = cv2.cvtColor(imgBGR, cv2.COLOR_BGR2RGB)
@@ -561,6 +582,49 @@ class Transformer:
         else:
             return imgBGR_aug, None
 
+    def aug_img(self, imgBGR, instance=None, img_info = None):
+        bbs = self._mk_bbs(instance, img_info)
+        imgRGB = cv2.cvtColor(imgBGR, cv2.COLOR_BGR2RGB)
+        imgRGB_aug, bbs_aug = self.aug_img_seq(image = imgRGB, bounding_boxes = bbs)
+        bbs_aug = bbs_aug.clip_out_of_image()
+        imgBGR_aug = cv2.cvtColor(imgRGB_aug, cv2.COLOR_RGB2BGR)
+
+        # for debug to show
+        # imgRGB_aug_with_box = bbs_aug.draw_on_image(imgRGB_aug,size = 2)
+        # imgRGB_aug_with_box = cv2.cvtColor(imgRGB_aug_with_box, cv2.COLOR_RGB2BGR)
+        # imgRGB_aug_with_box = cv2.resize(imgRGB_aug_with_box,(1333,800))
+        # imgRGB_with_box = bbs.draw_on_image(imgRGB, size=2)
+        # imgRGB_with_box = cv2.resize(imgRGB_with_box,(1333,800))
+        # imgRGB_with_box = cv2.cvtColor(imgRGB_with_box, cv2.COLOR_RGB2BGR)
+        # cv2.imshow('aug',imgRGB_aug_with_box)
+        # cv2.imshow('raw',imgRGB_with_box)
+        # cv2.waitKey(0)
+
+        # save json format
+        if bbs_aug is not None:
+            instance_aug = instance
+            for i in range(len(bbs_aug.bounding_boxes)):
+                box = []
+                box.append(bbs_aug.bounding_boxes[i].x1)
+                box.append(bbs_aug.bounding_boxes[i].y1)
+                box.append(bbs_aug.bounding_boxes[i].x2)
+                box.append(bbs_aug.bounding_boxes[i].y2)
+                instance_aug[i].bbox = box
+                instance_aug[i].w = box[2] - box[0]
+                instance_aug[i].h = box[3] - box[1]
+                return imgBGR_aug, instance_aug
+        else:
+            return imgBGR_aug, None
+
+    def _mk_bbs(self, instance, img_info):
+        BBox = [] #[ Bounding_box, Bounding_box,]
+        w = img_info.img_w
+        h = img_info.img_h
+        for ins in instance:
+            box = ins.bbox
+            BBox.append(BoundingBox(x1 = box[0], y1 = box[1], x2 = box[2], y2 = box[3]))
+
+        return BoundingBoxesOnImage(BBox,shape = (h,w))
 
 def compute_wh(box):
     x1, y1, x2, y2 = box
