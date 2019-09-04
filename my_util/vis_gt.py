@@ -22,6 +22,7 @@ from imgaug import augmenters as iaa
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import imageio
 import getpass  # 获取用户名
+import random
 
 USER = getpass.getuser()
 
@@ -335,6 +336,16 @@ class Config:
         self.json_paths = ['']
         self.allimg_path = ''
 
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)
 
 class DataAnalyze:
     '''
@@ -512,8 +523,9 @@ class DataAnalyze:
                         continue
         #
         # # 保存aug_json 文件
+        random.shuffle(aug_json_list)
         with open(json_file_path, 'w') as f:
-            json.dump(aug_json_list, f, indent=4, separators=(',', ': '))
+            json.dump(aug_json_list, f, indent=4, separators=(',', ': '), cls=MyEncoder)
 
     def vis_gt(self, flag_show_raw_img=False):
         '''
