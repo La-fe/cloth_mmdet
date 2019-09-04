@@ -498,15 +498,18 @@ class DataAnalyze:
                 for i in range(each_num):  # 循环多次进行增广保存
                     img_ins = copy.deepcopy(self.img_instance[instance.name])
                     aug_img, img_info_tmp = transformer.aug_img(img, img_ins, img_info = img_info) # list
-                    aug_name = '%s_aug%d.jpg' % (
-                    osp.splitext(instance.name)[0], i) # 6598413.jpg -> 6598413_aug0.jpg, 6598413_aug1.jpg
-                    aug_abs_path = osp.join(aug_save_path, aug_name)
-                    for ins in img_info_tmp:
-                        ins.name = aug_name
-                        ins.abs_path = aug_abs_path
-                        aug_json_list.append(ins)
+                    if img_info_tmp is not None:
+                        aug_name = '%s_aug%d.jpg' % (
+                        osp.splitext(instance.name)[0], i) # 6598413.jpg -> 6598413_aug0.jpg, 6598413_aug1.jpg
+                        aug_abs_path = osp.join(aug_save_path, aug_name)
+                        for ins in img_info_tmp:
+                            ins.name = aug_name
+                            ins.abs_path = aug_abs_path
+                            aug_json_list.append(ins)
 
-                    cv2.imwrite(aug_abs_path, aug_img)
+                        cv2.imwrite(aug_abs_path, aug_img)
+                    else:
+                        continue
         #
         # # 保存aug_json 文件
         with open(json_file_path, 'w') as f:
@@ -601,7 +604,7 @@ class Transformer:
         # cv2.waitKey(0)
 
         # save json format
-        if bbs_aug is not None:
+        if len(bbs_aug.bounding_boxes) != 0:
             instance_aug = instance
             for i in range(len(bbs_aug.bounding_boxes)):
                 box = []
